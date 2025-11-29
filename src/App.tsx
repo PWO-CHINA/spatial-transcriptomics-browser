@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { 
-  Search, X, BookOpen, Microscope, Target, Layers, FileText, 
-  ExternalLink, Cpu, Scan, Grid, List, Info, Filter, Dna, Pipette, Zap
+  Search, X, BookOpen, Microscope, Target, Layers,
+  ExternalLink, Cpu, Scan, Grid, List, Info, Filter, Dna, Pipette
 } from 'lucide-react';
 
 // ==========================================
