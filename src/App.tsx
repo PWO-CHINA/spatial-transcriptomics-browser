@@ -1,19 +1,17 @@
 import { useState, useMemo } from 'react';
 import { 
   Search, X, BookOpen, Microscope, Target, Layers,
-  ExternalLink, Cpu, Scan, Grid, List, Info, Filter, Dna, Pipette
+  ExternalLink, Cpu, Scan, Grid, List, Info, Filter, Dna, Pipette, Link as LinkIcon
 } from 'lucide-react';
 
 // ==========================================
-// 数据源：严格基于 Cheng et al. 2023 综述
-// 完整覆盖 Table 1 (所有分类), Table 2 (所有参数), Table 3 (所有应用)
-// 语言：全中文 (专业术语保留中英对照)
+// 数据源：基于 Liu et al. 2024 (Cell) 及 Cheng et al. 2023
+// 参考文献 DOI 已根据 Liu et al. 2024 PDF 提供的 Reference 列表进行匹配
 // ==========================================
 
 const srtData = [
   // =================================================================================
   // 1. Sequencing-based: In situ spatial barcoding (基于原位空间条形码的测序方法)
-  // 对应 Table 2 的核心参数
   // =================================================================================
   {
     id: "stereo-seq",
@@ -35,7 +33,8 @@ const srtData = [
       { species: "蝾螈", tissue: "端脑", note: "脑再生机制研究 [Table 3]" },
       { species: "拟南芥", tissue: "叶片", note: "植物细胞亚型空间分布 [Table 3]" }
     ],
-    references: { origin: "Chen et al., 2022a", review_loc: "Table 1, 2, 3" }
+    references: { origin: "Chen et al., 2022a", review_loc: "Table 1, 2, 3", ref_id: "35" },
+    doi: "https://doi.org/10.1016/j.cell.2022.04.003"
   },
   {
     id: "seq-scope",
@@ -55,7 +54,8 @@ const srtData = [
       { species: "小鼠", tissue: "肝脏", note: "肝小叶分区分析 [Table 3]" },
       { species: "小鼠", tissue: "结肠", note: "炎症分析" }
     ],
-    references: { origin: "Cho et al., 2021", review_loc: "Table 1, 2" }
+    references: { origin: "Cho et al., 2021", review_loc: "Table 1, 2", ref_id: "32" },
+    doi: "https://doi.org/10.1016/j.cell.2021.05.010"
   },
   {
     id: "pixel-seq",
@@ -74,7 +74,8 @@ const srtData = [
     applications: [
       { species: "小鼠", tissue: "嗅球", note: "空间转录组测序 [Table 2]" }
     ],
-    references: { origin: "Fu et al., 2022", review_loc: "Table 1, 2" }
+    references: { origin: "Fu et al., 2022", review_loc: "Table 1, 2", ref_id: "36" },
+    doi: "https://doi.org/10.1016/j.cell.2022.10.021"
   },
   {
     id: "stomics-genx",
@@ -91,7 +92,8 @@ const srtData = [
     principle: "Stereo-seq 的优化版本或衍生技术，专注于提高基因检出率。",
     features: ["超高捕获效率", "无需 CRISPR 清除 rRNA"],
     applications: [{ species: "小鼠", tissue: "嗅球", note: "高灵敏度检测 [Table 2]" }],
-    references: { origin: "Currenti et al., 2022", review_loc: "Table 1, 2" }
+    references: { origin: "Currenti et al., 2022", review_loc: "Table 1, 2" },
+    // DOI not found in the provided PDF reference list
   },
   {
     id: "hdst",
@@ -110,28 +112,30 @@ const srtData = [
     applications: [
       { species: "小鼠", tissue: "嗅球", note: "高清晰度映射 [Table 2]" }
     ],
-    references: { origin: "Vickovic et al., 2019", review_loc: "Table 1, 2" }
+    references: { origin: "Vickovic et al., 2019", review_loc: "Table 1, 2", ref_id: "30" },
+    doi: "https://doi.org/10.1038/s41592-019-0548-y"
   },
   {
     id: "visium",
-    name: "Visium",
+    name: "Visium / Visium HD",
     full_name: "Visium Spatial Gene Expression",
     category: "基于测序",
     subcategory: "原位空间条形码",
     targets: "PolyA RNA / 靶向基因 (FFPE)",
-    resolution: "55 μm (1-10个细胞)",
-    spot_size: "55 μm",
-    distance: "100 μm",
+    resolution: "55 μm (Visium) / 2 μm (Visium HD)",
+    spot_size: "55 μm / 2 μm",
+    distance: "100 μm / -",
     capture_efficiency: "高 (~15,377 UMIs/点)",
     field_of_view: "6.5 mm × 6.5 mm",
-    principle: "ST 技术的商业化升级版。缩小了捕获点和间距。支持新鲜冷冻 (PolyA) 和 FFPE (探针杂交) 样本。结合 H&E 或免疫荧光成像。",
-    features: ["最成熟的商业平台", "兼容 FFPE 样本", "操作流程标准化"],
+    principle: "ST 技术的商业化升级版。Visium HD 使用 2μm 的探针阵列实现单细胞级分辨率。",
+    features: ["最成熟的商业平台", "兼容 FFPE 样本", "操作流程标准化", "HD 版本分辨率大幅提升"],
     applications: [
       { species: "人类", tissue: "背外侧前额叶皮层", note: "空间基因表达分层 [Table 3]" },
       { species: "人类", tissue: "肠道", note: "损伤修复机制 [Table 3]" },
       { species: "人类", tissue: "胶质母细胞瘤", note: "肿瘤微环境 [Table 3]" }
     ],
-    references: { origin: "10x Genomics, 2019", review_loc: "Table 1, 2, 3" }
+    references: { origin: "Oliveira et al., 2024 (Visium HD)", review_loc: "Table 1, 2, 3", ref_id: "38" },
+    doi: "https://doi.org/10.1101/2024.06.04.597233"
   },
   {
     id: "st",
@@ -152,7 +156,8 @@ const srtData = [
       { species: "拟南芥", tissue: "叶芽", note: "植物基因表达定量 [Table 3]" },
       { species: "人/鼠", tissue: "脊髓 (ALS)", note: "渐冻症病理动力学 [Table 3]" }
     ],
-    references: { origin: "Ståhl et al., 2016", review_loc: "Table 1, 2, 3" }
+    references: { origin: "Ståhl et al., 2016", review_loc: "Table 1, 2, 3", ref_id: "76" },
+    doi: "https://doi.org/10.1126/science.aaf2403"
   },
   {
     id: "sm-omics",
@@ -169,7 +174,8 @@ const srtData = [
     principle: "基于 ST 的自动化平台，增加了抗体标记的蛋白质检测能力，实现了空间多组学。",
     features: ["自动化流程", "多组学 (转录组+蛋白)"],
     applications: [{ species: "小鼠", tissue: "脾脏", note: "多组学分析 [Table 2]" }],
-    references: { origin: "Vickovic et al., 2022", review_loc: "Table 1, 2" }
+    references: { origin: "Vickovic et al., 2022", review_loc: "Table 1, 2", ref_id: "48" },
+    doi: "https://doi.org/10.1038/s41467-022-28445-y"
   },
   {
     id: "ex-st",
@@ -186,7 +192,8 @@ const srtData = [
     principle: "结合组织膨胀技术 (Expansion Microscopy) 和 Visium 芯片。通过物理膨胀组织来提高有效分辨率。",
     features: ["无需新硬件即可提升 Visium 分辨率", "提高捕获效率"],
     applications: [{ species: "小鼠", tissue: "嗅球", note: "高分辨重构 [Table 2]" }],
-    references: { origin: "Fan et al., 2022", review_loc: "Table 1, 2" }
+    references: { origin: "Fan et al., 2022", review_loc: "Table 1, 2", ref_id: "60" },
+    doi: "https://doi.org/10.1101/2022.10.25.513696"
   },
   {
     id: "slide-seq",
@@ -207,7 +214,8 @@ const srtData = [
       { species: "人类", tissue: "肝癌", note: "空间结构分析 [Table 3]" },
       { species: "人类", tissue: "黑色素瘤脑转移", note: "肿瘤生态系统 [Table 3]" }
     ],
-    references: { origin: "Rodriques et al., 2019", review_loc: "Table 1, 2, 3" }
+    references: { origin: "Rodriques et al., 2019", review_loc: "Table 1, 2, 3", ref_id: "78" },
+    doi: "https://doi.org/10.1126/science.aaw1219"
   },
   {
     id: "xyzeq",
@@ -243,7 +251,8 @@ const srtData = [
     principle: "结合单细胞索引 (sci-RNA-seq) 和空间索引。在保留单细胞分辨率的同时获取空间信息。",
     features: ["单细胞分辨率", "较大视场", "基于组合索引"],
     applications: [{ species: "小鼠", tissue: "胚胎 (E14.0)", note: "发育图谱 [Table 2]" }],
-    references: { origin: "Srivatsan et al., 2021", review_loc: "Table 1, 2" }
+    references: { origin: "Srivatsan et al., 2021", review_loc: "Table 1, 2", ref_id: "34" },
+    doi: "https://doi.org/10.1126/science.abb9536"
   },
   {
     id: "masc-seq",
@@ -280,7 +289,8 @@ const srtData = [
       { species: "小鼠", tissue: "胚胎", note: "多组学测序 [Table 2]" },
       { species: "小鼠", tissue: "FFPE 组织", note: "DBiT-seq (FFPE) [Table 1]" }
     ],
-    references: { origin: "Liu et al., 2020b", review_loc: "Table 1, 2" }
+    references: { origin: "Liu et al., 2020b", review_loc: "Table 1, 2", ref_id: "42" },
+    doi: "https://doi.org/10.1016/j.cell.2020.10.026"
   },
   {
     id: "matrix-seq",
@@ -331,7 +341,8 @@ const srtData = [
     principle: "将 CITE-seq (基于抗体寡核苷酸标签的细胞表面蛋白测序) 引入空间维度。",
     features: ["高复用蛋白检测", "空间转录组共测"],
     applications: [{ species: "小鼠", tissue: "脾脏", note: "免疫细胞分析 [Table 2]" }],
-    references: { origin: "Liu et al., 2022d", review_loc: "Table 1, 2" }
+    references: { origin: "Liu et al., 2022d", review_loc: "Table 1, 2", ref_id: "57" },
+    doi: "https://doi.org/10.1038/s41587-023-01676-0"
   },
   {
     id: "spatial-atac-rna-seq",
@@ -348,7 +359,8 @@ const srtData = [
     principle: "在同一切片上同时捕获转录组 (RNA) 和染色质可及性 (ATAC) 信息。",
     features: ["表观遗传学 + 转录组", "微流控通道"],
     applications: [{ species: "小鼠", tissue: "胚胎", note: "多组学发育 [Table 2]" }],
-    references: { origin: "Jiang et al., 2023", review_loc: "Table 1, 2" }
+    references: { origin: "Jiang et al., 2023", review_loc: "Table 1, 2", ref_id: "83" },
+    doi: "https://doi.org/10.1101/2022.03.22.485333"
   },
   {
     id: "spots",
@@ -433,7 +445,8 @@ const srtData = [
     principle: "基于 Slide-seq，增加了对 T 细胞受体 (TCR) 序列的靶向捕获。",
     features: ["免疫组学", "T细胞克隆追踪"],
     applications: [{ species: "小鼠", tissue: "淋巴组织", note: "免疫微环境 [Table 1]" }],
-    references: { origin: "Liu et al., 2022b", review_loc: "Table 1" }
+    references: { origin: "Liu et al., 2022b", review_loc: "Table 1", ref_id: "52" },
+    doi: "https://doi.org/10.1016/j.immuni.2022.09.002"
   },
   {
     id: "spatial-vdj",
@@ -467,7 +480,8 @@ const srtData = [
     principle: "结合谱系示踪 (Lineage tracing) 和空间转录组。",
     features: ["克隆谱系追踪", "肿瘤演化"],
     applications: [{ species: "小鼠", tissue: "肿瘤", note: "克隆关系 [Table 1]" }],
-    references: { origin: "Ratz et al., 2021", review_loc: "Table 1" }
+    references: { origin: "Ratz et al., 2021", review_loc: "Table 1", ref_id: "50" },
+    doi: "https://doi.org/10.1038/s41593-022-01011-x"
   },
   {
     id: "perturb-map",
@@ -484,12 +498,12 @@ const srtData = [
     principle: "结合 CRISPR 扰动筛选和空间转录组，在组织中直接鉴定基因功能。",
     features: ["功能基因组学", "CRISPR 筛选"],
     applications: [{ species: "小鼠", tissue: "肿瘤", note: "肿瘤微环境调节因子 [Table 1]" }],
-    references: { origin: "Dhainaut et al., 2022", review_loc: "Table 1" }
+    references: { origin: "Dhainaut et al., 2022", review_loc: "Table 1", ref_id: "51" },
+    doi: "https://doi.org/10.1016/j.cell.2022.02.015"
   },
 
   // =================================================================================
   // 2. Imaging-based: In situ Hybridization (基于原位杂交的成像方法)
-  // 对应 Table 1
   // =================================================================================
   {
     id: "merfish",
@@ -510,7 +524,8 @@ const srtData = [
       { species: "小鼠", tissue: "初级运动皮层", note: "细胞图谱 [Table 3]" },
       { species: "人/鼠", tissue: "大脑皮层", note: "进化保守性 [Table 3]" }
     ],
-    references: { origin: "Chen et al., 2015b", review_loc: "Table 1, 3" }
+    references: { origin: "Chen et al., 2015b", review_loc: "Table 1, 3", ref_id: "20" },
+    doi: "https://doi.org/10.1126/science.aaa6090"
   },
   {
     id: "seqfish",
@@ -530,7 +545,8 @@ const srtData = [
       { species: "小鼠", tissue: "胚胎", note: "器官发生 [Table 3]" },
       { species: "小鼠", tissue: "下丘脑腹内侧核", note: "行为控制 [Table 3]" }
     ],
-    references: { origin: "Lubeck & Cai, 2012 / Eng et al., 2019", review_loc: "Table 1, 3" }
+    references: { origin: "Eng et al., 2019", review_loc: "Table 1, 3", ref_id: "22" },
+    doi: "https://doi.org/10.1038/s41586-019-1049-y"
   },
   {
     id: "smfish",
@@ -547,7 +563,8 @@ const srtData = [
     principle: "使用多条荧光标记的探针结合同一 mRNA 分子，实现单分子可视化。",
     features: ["金标准灵敏度", "通量低 (通常 < 5 基因)", "用于验证其他技术"],
     applications: [{ species: "小鼠", tissue: "肝脏", note: "肝小叶分区 [Table 3]" }],
-    references: { origin: "Femino et al., 1998", review_loc: "Table 1, 3" }
+    references: { origin: "Femino et al., 1998", review_loc: "Table 1, 3", ref_id: "66" },
+    doi: "https://doi.org/10.1126/science.280.5363.585"
   },
   {
     id: "osmfish",
@@ -564,7 +581,8 @@ const srtData = [
     principle: "优化的 smFISH 方法，专用于组织切片的高分辨率成像。",
     features: ["组织水平的高分辨率", "适合中等通量"],
     applications: [{ species: "小鼠", tissue: "体感皮层", note: "空间组织结构 [Table 1]" }],
-    references: { origin: "Codeluppi et al., 2018", review_loc: "Table 1" }
+    references: { origin: "Codeluppi et al., 2018", review_loc: "Table 1", ref_id: "69" },
+    doi: "https://doi.org/10.1038/s41592-018-0175-2"
   },
   {
     id: "easi-fish",
@@ -581,7 +599,8 @@ const srtData = [
     principle: "结合组织膨胀技术 (Expansion Microscopy) 和迭代 FISH，便于在厚组织中进行成像。",
     features: ["适用于厚组织", "高分辨率", "利于观察拥挤分子"],
     applications: [{ species: "小鼠", tissue: "下丘脑", note: "方法验证 [Table 1]" }],
-    references: { origin: "Wang et al., 2021", review_loc: "Table 1" }
+    references: { origin: "Wang et al., 2021", review_loc: "Table 1", ref_id: "24" },
+    doi: "https://doi.org/10.1016/j.cell.2021.11.024"
   },
   {
     id: "eel-fish",
@@ -598,7 +617,8 @@ const srtData = [
     principle: "利用电泳加速 RNA 捕获到表面并进行探针杂交，显著缩短时间。",
     features: ["速度快", "适合大面积组织成像"],
     applications: [{ species: "小鼠", tissue: "脑", note: "方法验证 [Table 1]" }],
-    references: { origin: "Borm et al., 2023", review_loc: "Table 1" }
+    references: { origin: "Borm et al., 2023", review_loc: "Table 1", ref_id: "25" },
+    doi: "https://doi.org/10.1038/s41587-022-01455-3"
   },
   {
     id: "rnascope",
@@ -666,7 +686,8 @@ const srtData = [
     principle: "计算机辅助设计的杂交链式反应 (HCR)，用于增强信号。",
     features: ["信号放大", "多靶点"],
     applications: [{ species: "细胞", tissue: "N/A", note: "[Table 1]" }],
-    references: { origin: "Liu et al., 2022c", review_loc: "Table 1" }
+    references: { origin: "Liu et al., 2022c", review_loc: "Table 1", ref_id: "46" },
+    doi: "https://doi.org/10.1126/sciadv.abk0133"
   },
   {
     id: "mosaica",
@@ -683,7 +704,8 @@ const srtData = [
     principle: "基于荧光寿命成像和光谱编码的复用技术。",
     features: ["多组学", "FFPE 兼容"],
     applications: [{ species: "细胞", tissue: "FFPE", note: "[Table 1]" }],
-    references: { origin: "Vu et al., 2022", review_loc: "Table 1" }
+    references: { origin: "Vu et al., 2022", review_loc: "Table 1", ref_id: "47" },
+    doi: "https://doi.org/10.1038/s41467-021-27798-0"
   },
   {
     id: "wta",
@@ -722,7 +744,6 @@ const srtData = [
 
   // =================================================================================
   // 3. Imaging-based: In situ Sequencing (基于原位测序的成像方法)
-  // 对应 Table 1
   // =================================================================================
   {
     id: "iss",
@@ -741,7 +762,8 @@ const srtData = [
     applications: [
       { species: "小鼠", tissue: "脑", note: "方法验证 [Table 1]" }
     ],
-    references: { origin: "Ke et al., 2013", review_loc: "Table 1" }
+    references: { origin: "Ke et al., 2013", review_loc: "Table 1", ref_id: "19" },
+    doi: "https://doi.org/10.1038/nmeth.2563"
   },
   {
     id: "starmap",
@@ -761,7 +783,8 @@ const srtData = [
       { species: "小鼠", tissue: "脑 (AD模型)", note: "阿茨海默症病理 [Table 3]" },
       { species: "小鼠", tissue: "小脑核", note: "细胞类型演化 [Table 3]" }
     ],
-    references: { origin: "Wang et al., 2018b", review_loc: "Table 1, 3" }
+    references: { origin: "Wang et al., 2018b", review_loc: "Table 1, 3", ref_id: "21" },
+    doi: "https://doi.org/10.1126/science.aat5691"
   },
   {
     id: "barseq",
@@ -795,7 +818,8 @@ const srtData = [
     principle: "在细胞内直接对 RNA 进行逆转录 (RT) 和扩增，然后进行原位测序。",
     features: ["无偏倚全转录组", "效率较低，较难检测低丰度基因"],
     applications: [{ species: "细胞", tissue: "成纤维细胞", note: "方法验证 [Table 1]" }],
-    references: { origin: "Lee et al., 2014", review_loc: "Table 1" }
+    references: { origin: "Lee et al., 2014", review_loc: "Table 1", ref_id: "17" },
+    doi: "https://doi.org/10.1126/science.1250212"
   },
   {
     id: "exseq",
@@ -812,7 +836,8 @@ const srtData = [
     principle: "结合膨胀显微技术 (ExM) 和原位测序，实现超分辨率 RNA 测序。",
     features: ["超高分辨率", "适用于精细结构"],
     applications: [{ species: "细胞", tissue: "培养细胞", note: "方法验证 [Table 1]" }],
-    references: { origin: "Alon et al., 2021", review_loc: "Table 1" }
+    references: { origin: "Alon et al., 2021", review_loc: "Table 1", ref_id: "23" },
+    doi: "https://doi.org/10.1126/science.aax2656"
   },
   {
     id: "boloramis",
@@ -863,7 +888,8 @@ const srtData = [
     principle: "原位检测正在翻译的 mRNA (Ribosome-bound)，反映蛋白质合成的空间状态。",
     features: ["翻译组学", "功能状态"],
     applications: [{ species: "细胞", tissue: "脑", note: "蛋白合成状态 [Table 1]" }],
-    references: { origin: "Zeng et al., 2022", review_loc: "Table 1" }
+    references: { origin: "Zeng et al., 2022", review_loc: "Table 1", ref_id: "54" },
+    doi: "https://doi.org/10.1126/science.add3067"
   },
   {
     id: "image-seq",
@@ -885,7 +911,6 @@ const srtData = [
 
   // =================================================================================
   // 4. Sequencing-based: Micro-dissection (基于显微切割的测序方法)
-  // 对应 Table 1
   // =================================================================================
   {
     id: "geo-seq",
@@ -905,7 +930,8 @@ const srtData = [
       { species: "小鼠", tissue: "胚胎", note: "原肠胚形成 [Table 3]" },
       { species: "小鼠", tissue: "脑", note: "早期发育结构 [Table 3]" }
     ],
-    references: { origin: "Chen et al., 2017", review_loc: "Table 1, 3" }
+    references: { origin: "Peng et al., 2016", review_loc: "Table 1, 3", ref_id: "28" },
+    doi: "https://doi.org/10.1016/j.devcel.2016.02.020"
   },
   {
     id: "tomo-seq",
@@ -925,7 +951,8 @@ const srtData = [
       { species: "斑马鱼", tissue: "胚胎", note: "全基因组断层扫描 [Table 3]" },
       { species: "人/鼠", tissue: "类原肠胚", note: "体外模型 [Table 3]" }
     ],
-    references: { origin: "Junker et al., 2014", review_loc: "Table 1, 3" }
+    references: { origin: "Junker et al., 2014", review_loc: "Table 1, 3", ref_id: "27" },
+    doi: "https://doi.org/10.1016/j.cell.2014.09.038"
   },
   {
     id: "dsp",
@@ -963,7 +990,8 @@ const srtData = [
     principle: "利用光控“拉链” (Zipper) 条形码。光照特定区域使条形码暴露并标记活细胞表面。",
     features: ["活细胞兼容", "实时映射"],
     applications: [{ species: "细胞", tissue: "免疫细胞", note: "方法验证 [Table 1]" }],
-    references: { origin: "Hu et al., 2020", review_loc: "Table 1" }
+    references: { origin: "Hu et al., 2020", review_loc: "Table 1", ref_id: "75" },
+    doi: "https://doi.org/10.1038/s41592-020-0880-2"
   },
   {
     id: "pic-seq",
@@ -980,7 +1008,8 @@ const srtData = [
     principle: "测序物理上粘连在一起的细胞团 (Physically Interacting Cells)，以研究细胞间相互作用。",
     features: ["细胞通讯研究", "无需显微镜定位"],
     applications: [{ species: "小鼠", tissue: "发育组织", note: "[Table 1]" }],
-    references: { origin: "Giladi et al., 2020", review_loc: "Table 1" }
+    references: { origin: "Honda et al., 2021 (PIC)", review_loc: "Table 1", ref_id: "33" },
+    doi: "https://doi.org/10.1038/s41467-021-24691-8"
   },
   {
     id: "gast-seq",
@@ -1078,7 +1107,7 @@ const SRTBrowser = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-slate-900 tracking-tight">SRT Explorer 空间转录组数据库</h1>
-                <p className="text-xs text-slate-500 font-medium">完整收录 Cheng et al. 2023 综述所有技术 (Table 1-3)</p>
+                <p className="text-xs text-slate-500 font-medium">数据来源: Liu et al., 2024 (Cell)</p>
               </div>
             </div>
 
@@ -1337,9 +1366,23 @@ const SRTBrowser = () => {
                     <BookOpen className="w-4 h-4" />
                     原文溯源 (Source)
                   </h4>
-                  <div className="space-y-2 text-xs text-indigo-800/80">
+                  <div className="space-y-3 text-xs text-indigo-800/80">
                     <p><span className="font-semibold">原始文献:</span> {selectedTech.references.origin}</p>
                     <p><span className="font-semibold">综述位置:</span> {selectedTech.references.review_loc}</p>
+                    {selectedTech.references.ref_id && (
+                       <p><span className="font-semibold">PDF Ref #:</span> {selectedTech.references.ref_id}</p>
+                    )}
+                    {selectedTech.doi && (
+                      <a 
+                        href={selectedTech.doi} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 mt-2 px-3 py-2 bg-white text-indigo-600 rounded-lg border border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 transition-colors font-medium shadow-sm w-fit"
+                      >
+                        <LinkIcon className="w-3.5 h-3.5" />
+                        查看文献 (DOI)
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
